@@ -46,3 +46,6 @@ IMPORTANTE
 - La aplicación no cobra, no se conecta a Square y no guarda datos en un servidor.
 - En algunas versiones de iOS las PWAs pueden tener limitaciones de almacenamiento.
 - Para actualizar código offline, vuelve a subir archivos y cambia el nombre CACHE en sw.js.
+
+ACCESS PIN: This version includes a basic 4-digit PIN screen. It is not secure authentication; public GitHub Pages source is visible.
+To update GitHub: upload the new index.html and sw.js (replace existing files), then reload.
