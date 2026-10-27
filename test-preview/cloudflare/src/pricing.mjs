@@ -8,11 +8,12 @@ export function priceOrder(request,catalog){
   let bps=String(product.taxBps);if(!['0','725','825'].includes(bps)||!int(product.baseCents))throw Error('Invalid server price or rate');
   if(line.temperature!==undefined&&!['Hot','Iced'].includes(line.temperature))throw Error('Invalid temperature');
   let base=line.temperature==='Iced'&&product.icedCents!=null?product.icedCents:product.baseCents;if(!int(base))throw Error('Invalid price');
+  if(line.note!==undefined&&(typeof line.note!=='string'||line.note.length>500))throw Error('Invalid note');
   let chosen=line.modifierIds||[];if(!Array.isArray(chosen)||new Set(chosen).size!==chosen.length)throw Error('Duplicate modifiers');
   let assigned=catalog.groups.filter(g=>(product.groupIds||[]).includes(g.id)&&g.active);let mods=[];
   for(let id of chosen){let group=assigned.find(g=>g.options.some(o=>o.id===id&&o.active));if(!group)throw Error('Invalid modifier');}
   for(const group of assigned){let options=chosen.map(id=>group.options.find(o=>o.id===id&&o.active)).filter(Boolean);if(options.length<(group.min||0)||(group.max&&options.length>group.max))throw Error('Invalid modifier count');options.forEach((o,i)=>{if(!int(o.priceCents)||typeof o.taxable!=='boolean')throw Error('Invalid modifier price');mods.push({id:o.id,name:o.name,priceCents:i<(group.included||0)?0:o.priceCents,taxable:o.taxable})});}
-  let unit=base+mods.reduce((n,m)=>n+m.priceCents,0),taxable=base+mods.reduce((n,m)=>n+(m.taxable?m.priceCents:0),0);subtotal+=unit*line.quantity;bases[bps]+=taxable*line.quantity;if(!int(subtotal)||!int(bases[bps]))throw Error('Amount too large');items.push({productId:product.id,name:product.name,quantity:line.quantity,baseCents:base,taxBps:Number(bps),modifiers:mods,unitCents:unit});
+  let unit=base+mods.reduce((n,m)=>n+m.priceCents,0),taxable=base+mods.reduce((n,m)=>n+(m.taxable?m.priceCents:0),0);subtotal+=unit*line.quantity;bases[bps]+=taxable*line.quantity;if(!int(subtotal)||!int(bases[bps]))throw Error('Amount too large');items.push({productId:product.id,name:product.name,quantity:line.quantity,note:line.note||'',baseCents:base,taxBps:Number(bps),modifiers:mods,unitCents:unit});
  }
  let taxes=Object.fromEntries(Object.entries(bases).map(([bps,amount])=>{let t=(BigInt(amount)*BigInt(bps)+5000n)/10000n;if(t>BigInt(Number.MAX_SAFE_INTEGER))throw Error('Tax too large');return [bps,Number(t)]}));let tax=Object.values(taxes).reduce((a,b)=>a+b,0),total=subtotal+tax;if(!int(total))throw Error('Amount too large');return {items,subtotalCents:subtotal,taxableBases:bases,taxes,taxCents:tax,totalCents:total};
 }
