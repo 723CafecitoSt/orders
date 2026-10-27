@@ -1,0 +1,2 @@
+import {test} from 'node:test';import assert from 'node:assert/strict';import {createTestClient} from '../src/test-client.mjs';
+test('client is disabled by default and rejects public or non-HTTPS endpoints',async()=>{await assert.rejects(createTestClient().catalog(),/disabled/);assert.throws(()=>createTestClient({enabled:true,baseUrl:'https://example.com'}),/local/);assert.throws(()=>createTestClient({enabled:true,baseUrl:'http://127.0.0.1'}),/local/)});
