@@ -1,0 +1,15 @@
+import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
+const src = await readFile(new URL('./tax-calculation.js', import.meta.url), 'utf8');
+const {calculateTaxes} = await import('data:text/javascript;base64,' + Buffer.from(src).toString('base64'));
+const item = (rate, qty, basePriceCents, modifiers=[]) => ({taxBasisPoints:rate,qty,basePriceCents,modifiers});
+const result = calculateTaxes([item(825,2,800,[{priceCents:0,taxable:true},{priceCents:100,taxable:true}]), item(725,1,700,[{priceCents:150,taxable:true}]), item(0,1,500)]);
+assert.equal(result.subtotalCents,3150);
+assert.deepEqual(result.breakdown.map(x=>[x.taxBasisPoints,x.baseCents,x.taxCents]),[[0,500,0],[725,850,62],[825,1800,149]]);
+assert.equal(result.taxCents,211);
+assert.equal(result.totalCents,3361);
+assert.equal(calculateTaxes([item(825,1,100)]).taxCents,8);
+assert.equal(calculateTaxes([item(725,1,100)]).taxCents,7);
+assert.equal(calculateTaxes([item(0,1,100)]).taxCents,0);
+assert.throws(()=>calculateTaxes([item(900,1,100)]));
+console.log('Tax calculations passed.');
