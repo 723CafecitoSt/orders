@@ -9,7 +9,8 @@ const tables={
  modifiers:[{id:'caramel',group_id:'flavor',name:'Caramel',price_cents:100,taxable:1,active:1}],
  product_groups:[{product_id:'latte',group_id:'flavor'}],
 };
-const db={prepare(sql){const match=sql.match(/FROM\s+(products|modifier_groups|modifiers|product_groups)/i);if(!match)throw Error('Unexpected query');return {async all(){return {results:tables[match[1]].map(x=>({...x}))}}}}};
+tables.catalog_revision=[{revision:7}];
+const db={async batch(stmts){return Promise.all(stmts.map(s=>s.all()))},prepare(sql){const match=sql.match(/FROM\s+(products|modifier_groups|modifiers|product_groups|catalog_revision)/i);if(!match)throw Error('Unexpected query');return {async all(){return {results:tables[match[1]].map(x=>({...x}))}}}}};
 
 test('Loads D1-owned price and modifier metadata',async()=>{
  const catalog=await loadCatalog(db);
@@ -22,3 +23,4 @@ test('Loads D1-owned price and modifier metadata',async()=>{
  assert.equal(priced.totalCents,866);
 });
 test('Rejects missing D1 binding',async()=>{await assert.rejects(loadCatalog(null),/D1 binding required/)});
+
