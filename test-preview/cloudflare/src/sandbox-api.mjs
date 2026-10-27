@@ -33,12 +33,12 @@ export async function sandboxApi(request,env){
   if(url.pathname==='/api/logout'&&request.method==='POST'){await logout(env.DB,session);await audit(env.DB,employee.id,'logout',null);return reply(200,{ok:true})}
   if(url.pathname==='/api/catalog'&&request.method==='GET')return reply(200,await loadCatalog(env.DB));
   if(url.pathname==='/api/orders'&&request.method==='POST'){
-   try{let result=await createOrder(env.DB,{id:body.id,employeeId:employee.id,request:body.request,now:Date.now()});await audit(env.DB,employee.id,'order_created',body.id,{totalCents:result.totalCents});return reply(201,result)}catch{return reply(409,{error:'invalid_or_conflicting_order'})}
+   try{let result=await createOrder(env.DB,{id:body.id,employeeId:employee.id,request:body.request,now:Date.now()});return reply(201,result)}catch{return reply(409,{error:'invalid_or_conflicting_order'})}
   }
   if(url.pathname==='/api/orders'&&request.method==='GET'){let id=url.searchParams.get('id');if(!idOK(id))return reply(400,{error:'invalid_id'});let order=await getOrder(env.DB,id);return order?reply(200,order):reply(404,{error:'not_found'})}
   if(url.pathname==='/api/attempts'&&request.method==='POST'){
    if(!idOK(body.id)||!idOK(body.orderId)||!idOK(body.idempotencyKey))return reply(400,{error:'invalid_attempt'});let order=await getOrder(env.DB,body.orderId);if(!order)return reply(404,{error:'not_found'});
-   try{let a=await reserveAttempt(env.DB,{id:body.id,orderId:body.orderId,idempotencyKey:body.idempotencyKey,requestHash:await hash(order.snapshot_json),now:Date.now()});await audit(env.DB,employee.id,'attempt_reserved',a.id,{orderId:a.order_id});return reply(200,{id:a.id,orderId:a.order_id,status:a.status})}catch{return reply(409,{error:'attempt_conflict'})}
+   try{let a=await reserveAttempt(env.DB,{id:body.id,orderId:body.orderId,idempotencyKey:body.idempotencyKey,requestHash:await hash(order.snapshot_json),now:Date.now()});return reply(200,{id:a.id,orderId:a.order_id,status:a.status})}catch{return reply(409,{error:'attempt_conflict'})}
   }
   if(url.pathname==='/api/attempts'&&request.method==='GET'){let id=url.searchParams.get('id');if(!idOK(id))return reply(400,{error:'invalid_id'});let a=await env.DB.prepare('SELECT id,order_id,status,created_at,updated_at FROM payment_attempts WHERE id=?').bind(id).first();return a?reply(200,a):reply(404,{error:'not_found'})}
   if(url.pathname==='/api/attempts/uncertain'&&request.method==='POST'){if(!idOK(body.id))return reply(400,{error:'invalid_id'});let a=await recordUncertain(env.DB,body.id,Date.now());if(!a)return reply(404,{error:'not_found'});await audit(env.DB,employee.id,'attempt_uncertain',a.id,{status:a.status});return reply(200,{id:a.id,status:a.status})}
