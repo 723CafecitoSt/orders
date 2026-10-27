@@ -37,11 +37,13 @@ export async function sandboxApi(request,env){
   }
   if(url.pathname==='/api/kitchen'&&request.method==='GET'){
    let station=url.searchParams.get('station');if(!['beverages','food'].includes(station))return reply(400,{error:'invalid_station'});
+   if(employee.role!=='admin'&&!(await env.DB.prepare('SELECT 1 AS ok FROM kitchen_access WHERE employee_id=? AND station=?').bind(employee.id,station).first()))return reply(403,{error:'station_forbidden'});
    let rows=await env.DB.prepare('SELECT order_id,line_index,station,snapshot_json,status,version,updated_at FROM kitchen_items WHERE station=? ORDER BY updated_at DESC,order_id DESC,line_index LIMIT 500').bind(station).all();
    return reply(200,{items:rows.results.map(r=>{let item=JSON.parse(r.snapshot_json);return {orderId:r.order_id,lineIndex:r.line_index,station:r.station,name:item.name,quantity:item.quantity,modifiers:item.modifiers.map(m=>m.name),note:item.note||'',status:r.status,version:r.version}})});
   }
   if(url.pathname==='/api/kitchen/status'&&request.method==='POST'){
    if(!idOK(body.orderId)||!Number.isSafeInteger(body.lineIndex)||body.lineIndex<0||!Number.isSafeInteger(body.version)||body.version<0||!['preparing','ready'].includes(body.status))return reply(400,{error:'invalid_state'});
+   let target=await env.DB.prepare('SELECT station FROM kitchen_items WHERE order_id=? AND line_index=?').bind(body.orderId,body.lineIndex).first();if(!target)return reply(404,{error:'not_found'});if(employee.role!=='admin'&&!(await env.DB.prepare('SELECT 1 AS ok FROM kitchen_access WHERE employee_id=? AND station=?').bind(employee.id,target.station).first()))return reply(403,{error:'station_forbidden'});
    let r=await env.DB.prepare("UPDATE kitchen_items SET status=?,version=version+1,updated_by=?,updated_at=? WHERE order_id=? AND line_index=? AND version=? AND (status='new' OR (status='preparing' AND ?='ready')) RETURNING status,version").bind(body.status,employee.id,Date.now(),body.orderId,body.lineIndex,body.version,body.status).first();return r?reply(200,r):reply(409,{error:'stale_or_invalid_state'});
   }
   if(url.pathname==='/api/catalog'&&request.method==='GET')return reply(200,await loadCatalog(env.DB));
