@@ -1,0 +1,9 @@
+// Local sandbox-only HTTP adapter. Never bind publicly; production deployment needs
+// independent identity, TLS, origin controls and a security review.
+import http from 'node:http';import {timingSafeEqual} from 'node:crypto';import {CashService} from './service.mjs';
+const {SQUARE_SANDBOX_ACCESS_TOKEN:token,SQUARE_SANDBOX_LOCATION_ID:locationId,ORDER_STATION_BACKEND_SECRET:secret,ORDER_STATION_DB_PATH:path,SQUARE_ENVIRONMENT:env='sandbox'}=process.env;
+if(env!=='sandbox'||!token||!locationId||!path||!secret||Buffer.byteLength(secret)<32)throw Error('Sandbox, local database and server secrets required');
+const svc=new CashService({databasePath:path,locationId,accessToken:token,environment:env});
+function authorized(header){const expected=Buffer.from('Bearer '+secret),actual=Buffer.from(header||'');return expected.length===actual.length&&timingSafeEqual(expected,actual)}
+function send(res,status,data){res.writeHead(status,{'Content-Type':'application/json','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'});res.end(JSON.stringify(data))}
+http.createServer(async(req,res)=>{if(!authorized(req.headers.authorization))return send(res,401,{error:'Unauthorized'});if(req.method==='POST'&&req.url==='/sandbox/cash'){try{let data='',size=0;for await(const chunk of req){size+=chunk.length;if(size>65536)return send(res,413,{error:'Too large'});data+=chunk}let result=await svc.process(JSON.parse(data));return send(res,200,result)}catch{return send(res,400,{error:'Invalid request or conflict'})}}if(req.method==='GET'&&/^\/sandbox\/attempts\/[a-zA-Z0-9_-]{8,64}$/.test(req.url)){let row=svc.get(req.url.split('/').pop());return row?send(res,200,{status:row.status,orderId:row.square_order_id,paymentId:row.payment_id,uncertain:!!row.last_error}):send(res,404,{error:'Not found'})}return send(res,404,{error:'Not found'})}).listen(8787,'127.0.0.1',()=>console.log('Sandbox server listening on localhost:8787'));
