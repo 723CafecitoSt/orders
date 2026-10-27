@@ -1,0 +1,14 @@
+CREATE TABLE catalog_revision (singleton INTEGER PRIMARY KEY CHECK(singleton=1), revision INTEGER NOT NULL);
+INSERT INTO catalog_revision VALUES(1,0);
+CREATE TRIGGER product_insert_rev AFTER INSERT ON products BEGIN UPDATE catalog_revision SET revision=revision+1 WHERE singleton=1; END;
+CREATE TRIGGER product_update_rev AFTER UPDATE ON products BEGIN UPDATE catalog_revision SET revision=revision+1 WHERE singleton=1; END;
+CREATE TRIGGER product_delete_rev AFTER DELETE ON products BEGIN UPDATE catalog_revision SET revision=revision+1 WHERE singleton=1; END;
+CREATE TRIGGER groups_insert_rev AFTER INSERT ON modifier_groups BEGIN UPDATE catalog_revision SET revision=revision+1 WHERE singleton=1; END;
+CREATE TRIGGER groups_update_rev AFTER UPDATE ON modifier_groups BEGIN UPDATE catalog_revision SET revision=revision+1 WHERE singleton=1; END;
+CREATE TRIGGER groups_delete_rev AFTER DELETE ON modifier_groups BEGIN UPDATE catalog_revision SET revision=revision+1 WHERE singleton=1; END;
+CREATE TRIGGER modifier_insert_rev AFTER INSERT ON modifiers BEGIN UPDATE catalog_revision SET revision=revision+1 WHERE singleton=1; END;
+CREATE TRIGGER modifier_update_rev AFTER UPDATE ON modifiers BEGIN UPDATE catalog_revision SET revision=revision+1 WHERE singleton=1; END;
+CREATE TRIGGER modifier_delete_rev AFTER DELETE ON modifiers BEGIN UPDATE catalog_revision SET revision=revision+1 WHERE singleton=1; END;
+CREATE TRIGGER mapping_insert_rev AFTER INSERT ON product_groups BEGIN UPDATE catalog_revision SET revision=revision+1 WHERE singleton=1; END;
+CREATE TRIGGER mapping_update_rev AFTER UPDATE ON product_groups BEGIN UPDATE catalog_revision SET revision=revision+1 WHERE singleton=1; END;
+CREATE TRIGGER mapping_delete_rev AFTER DELETE ON product_groups BEGIN UPDATE catalog_revision SET revision=revision+1 WHERE singleton=1; END;
