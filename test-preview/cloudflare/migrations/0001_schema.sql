@@ -1,0 +1,10 @@
+PRAGMA foreign_keys=ON;
+CREATE TABLE IF NOT EXISTS employees (id TEXT PRIMARY KEY, username TEXT NOT NULL UNIQUE, password_hash TEXT NOT NULL, salt TEXT NOT NULL, enabled INTEGER NOT NULL DEFAULT 1 CHECK(enabled IN(0,1)));
+CREATE TABLE IF NOT EXISTS sessions (id_hash TEXT PRIMARY KEY, employee_id TEXT NOT NULL REFERENCES employees(id), csrf_hash TEXT NOT NULL, expires_at INTEGER NOT NULL);
+CREATE INDEX IF NOT EXISTS sessions_expiry ON sessions(expires_at);
+CREATE TABLE IF NOT EXISTS products (id TEXT PRIMARY KEY, name TEXT NOT NULL, base_cents INTEGER NOT NULL CHECK(base_cents>=0), iced_cents INTEGER CHECK(iced_cents>=0), tax_bps INTEGER NOT NULL CHECK(tax_bps IN (0,725,825)), active INTEGER NOT NULL DEFAULT 1);
+CREATE TABLE IF NOT EXISTS modifier_groups (id TEXT PRIMARY KEY, name TEXT NOT NULL, min_selected INTEGER NOT NULL DEFAULT 0, max_selected INTEGER NOT NULL DEFAULT 0, included_count INTEGER NOT NULL DEFAULT 0, active INTEGER NOT NULL DEFAULT 1);
+CREATE TABLE IF NOT EXISTS modifiers (id TEXT PRIMARY KEY, group_id TEXT NOT NULL REFERENCES modifier_groups(id), name TEXT NOT NULL, price_cents INTEGER NOT NULL CHECK(price_cents>=0), taxable INTEGER NOT NULL CHECK(taxable IN(0,1)), active INTEGER NOT NULL DEFAULT 1);
+CREATE TABLE IF NOT EXISTS product_groups (product_id TEXT NOT NULL REFERENCES products(id), group_id TEXT NOT NULL REFERENCES modifier_groups(id), PRIMARY KEY(product_id,group_id));
+CREATE TABLE IF NOT EXISTS orders (id TEXT PRIMARY KEY, employee_id TEXT NOT NULL REFERENCES employees(id), snapshot_json TEXT NOT NULL, subtotal_cents INTEGER NOT NULL, tax_cents INTEGER NOT NULL, total_cents INTEGER NOT NULL, created_at INTEGER NOT NULL);
+CREATE TABLE IF NOT EXISTS payment_attempts (id TEXT PRIMARY KEY, order_id TEXT NOT NULL UNIQUE REFERENCES orders(id), idempotency_key TEXT NOT NULL UNIQUE, request_hash TEXT NOT NULL, status TEXT NOT NULL, square_order_id TEXT UNIQUE, square_payment_id TEXT UNIQUE, created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL);
