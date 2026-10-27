@@ -29,8 +29,21 @@ export async function sandboxApi(request,env){
    let session=await login(env.DB,body.username,body.password);await audit(env.DB,null,session?'login_success':'login_failure',null);return session?reply(200,session):reply(401,{error:'invalid_credentials'});
   }
   let session=(request.headers.get('authorization')||'').replace(/^Bearer /,''),csrf=request.headers.get('x-csrf-token')||'';
-  let admin=url.pathname==='/api/attempts/uncertain';let employee=await authorize(env.DB,session,csrf,admin?'admin':'cashier');if(!employee)return reply(401,{error:'unauthorized'});
+  let admin=['/api/attempts/uncertain','/api/stations'].includes(url.pathname);let employee=await authorize(env.DB,session,csrf,admin?'admin':'cashier');if(!employee)return reply(401,{error:'unauthorized'});
   if(url.pathname==='/api/logout'&&request.method==='POST'){await logout(env.DB,session);await audit(env.DB,employee.id,'logout',null);return reply(200,{ok:true})}
+  if(url.pathname==='/api/stations'&&request.method==='POST'){
+   if(!idOK(body.productId)||!['beverages','food'].includes(body.station))return reply(400,{error:'invalid_station'});
+   await env.DB.prepare('INSERT INTO product_stations(product_id,station,updated_by,updated_at) VALUES(?,?,?,?) ON CONFLICT(product_id) DO UPDATE SET station=excluded.station,updated_by=excluded.updated_by,updated_at=excluded.updated_at').bind(body.productId,body.station,employee.id,Date.now()).run();return reply(200,{ok:true});
+  }
+  if(url.pathname==='/api/kitchen'&&request.method==='GET'){
+   let station=url.searchParams.get('station');if(!['beverages','food'].includes(station))return reply(400,{error:'invalid_station'});
+   let rows=await env.DB.prepare('SELECT order_id,line_index,station,snapshot_json,status,version,updated_at FROM kitchen_items WHERE station=? ORDER BY updated_at,order_id,line_index LIMIT 500').bind(station).all();
+   return reply(200,{items:rows.results.map(r=>{let item=JSON.parse(r.snapshot_json);return {orderId:r.order_id,lineIndex:r.line_index,station:r.station,name:item.name,quantity:item.quantity,modifiers:item.modifiers.map(m=>m.name),note:item.note||'',status:r.status,version:r.version}})});
+  }
+  if(url.pathname==='/api/kitchen/status'&&request.method==='POST'){
+   if(!idOK(body.orderId)||!Number.isSafeInteger(body.lineIndex)||body.lineIndex<0||!Number.isSafeInteger(body.version)||body.version<0||!['preparing','ready'].includes(body.status))return reply(400,{error:'invalid_state'});
+   let r=await env.DB.prepare("UPDATE kitchen_items SET status=?,version=version+1,updated_by=?,updated_at=? WHERE order_id=? AND line_index=? AND version=? AND (status='new' OR (status='preparing' AND ?='ready')) RETURNING status,version").bind(body.status,employee.id,Date.now(),body.orderId,body.lineIndex,body.version,body.status).first();return r?reply(200,r):reply(409,{error:'stale_or_invalid_state'});
+  }
   if(url.pathname==='/api/catalog'&&request.method==='GET')return reply(200,await loadCatalog(env.DB));
   if(url.pathname==='/api/orders'&&request.method==='POST'){
    try{let result=await createOrder(env.DB,{id:body.id,employeeId:employee.id,request:body.request,now:Date.now()});return reply(201,result)}catch{return reply(409,{error:'invalid_or_conflicting_order'})}
