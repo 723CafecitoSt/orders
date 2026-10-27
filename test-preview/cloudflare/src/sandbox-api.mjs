@@ -37,7 +37,7 @@ export async function sandboxApi(request,env){
   }
   if(url.pathname==='/api/kitchen'&&request.method==='GET'){
    let station=url.searchParams.get('station');if(!['beverages','food'].includes(station))return reply(400,{error:'invalid_station'});
-   let rows=await env.DB.prepare('SELECT order_id,line_index,station,snapshot_json,status,version,updated_at FROM kitchen_items WHERE station=? ORDER BY updated_at,order_id,line_index LIMIT 500').bind(station).all();
+   let rows=await env.DB.prepare('SELECT order_id,line_index,station,snapshot_json,status,version,updated_at FROM kitchen_items WHERE station=? ORDER BY updated_at DESC,order_id DESC,line_index LIMIT 500').bind(station).all();
    return reply(200,{items:rows.results.map(r=>{let item=JSON.parse(r.snapshot_json);return {orderId:r.order_id,lineIndex:r.line_index,station:r.station,name:item.name,quantity:item.quantity,modifiers:item.modifiers.map(m=>m.name),note:item.note||'',status:r.status,version:r.version}})});
   }
   if(url.pathname==='/api/kitchen/status'&&request.method==='POST'){
@@ -46,7 +46,7 @@ export async function sandboxApi(request,env){
   }
   if(url.pathname==='/api/catalog'&&request.method==='GET')return reply(200,await loadCatalog(env.DB));
   if(url.pathname==='/api/orders'&&request.method==='POST'){
-   try{let result=await createOrder(env.DB,{id:body.id,employeeId:employee.id,request:body.request,now:Date.now()});return reply(201,result)}catch{return reply(409,{error:'invalid_or_conflicting_order'})}
+   try{let result=await createOrder(env.DB,{id:body.id,employeeId:employee.id,request:body.request,expectedTotalCents:body.expectedTotalCents,now:Date.now()});return reply(201,result)}catch{return reply(409,{error:'invalid_or_conflicting_order'})}
   }
   if(url.pathname==='/api/orders'&&request.method==='GET'){let id=url.searchParams.get('id');if(!idOK(id))return reply(400,{error:'invalid_id'});let order=await getOrder(env.DB,id);return order?reply(200,order):reply(404,{error:'not_found'})}
   if(url.pathname==='/api/attempts'&&request.method==='POST'){
