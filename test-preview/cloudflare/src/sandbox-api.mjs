@@ -38,8 +38,9 @@ export async function sandboxApi(request,env){
   if(url.pathname==='/api/kitchen'&&request.method==='GET'){
    let station=url.searchParams.get('station');if(!['beverages','food'].includes(station))return reply(400,{error:'invalid_station'});
    if(employee.role!=='admin'&&!(await env.DB.prepare('SELECT 1 AS ok FROM kitchen_access WHERE employee_id=? AND station=?').bind(employee.id,station).first()))return reply(403,{error:'station_forbidden'});
-   let rows=await env.DB.prepare('SELECT order_id,line_index,station,snapshot_json,status,version,updated_at FROM kitchen_items WHERE station=? ORDER BY updated_at DESC,order_id DESC,line_index LIMIT 500').bind(station).all();
-   return reply(200,{items:rows.results.map(r=>{let item=JSON.parse(r.snapshot_json);return {orderId:r.order_id,lineIndex:r.line_index,station:r.station,name:item.name,quantity:item.quantity,modifiers:item.modifiers.map(m=>m.name),note:item.note||'',status:r.status,version:r.version}})});
+   let before=url.searchParams.get('before'),limitText=url.searchParams.get('limit')||'100';if(!/^\d+$/.test(limitText)||Number(limitText)<1||Number(limitText)>100||(before!==null&&(!/^[1-9]\d{0,15}$/.test(before)||!Number.isSafeInteger(Number(before)))))return reply(400,{error:'invalid_page'});
+   let limit=Number(limitText),rows=await env.DB.prepare('SELECT rowid AS cursor_id,order_id,line_index,station,snapshot_json,status,version,updated_at FROM kitchen_items WHERE station=? AND rowid<? ORDER BY rowid DESC LIMIT ?').bind(station,before===null?Number.MAX_SAFE_INTEGER:Number(before),limit+1).all();let hasMore=rows.results.length>limit,visible=rows.results.slice(0,limit);
+   return reply(200,{items:visible.map(r=>{let item=JSON.parse(r.snapshot_json);return {orderId:r.order_id,lineIndex:r.line_index,station:r.station,name:item.name,quantity:item.quantity,modifiers:item.modifiers.map(m=>m.name),note:item.note||'',status:r.status,version:r.version}}),nextCursor:hasMore?String(visible.at(-1).cursor_id):null});
   }
   if(url.pathname==='/api/kitchen/status'&&request.method==='POST'){
    if(!idOK(body.orderId)||!Number.isSafeInteger(body.lineIndex)||body.lineIndex<0||!Number.isSafeInteger(body.version)||body.version<0||!['preparing','ready'].includes(body.status))return reply(400,{error:'invalid_state'});
