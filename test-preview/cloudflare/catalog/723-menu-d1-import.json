@@ -1,0 +1,537 @@
+{
+  "version": 2,
+  "source": "Existing test-preview/index.html catalog; no newly invented base prices",
+  "menu": [
+    {
+      "id": "default0",
+      "name": "Americano",
+      "station": "Coffee Station",
+      "temp": "hotcold",
+      "active": true,
+      "seasonal": false,
+      "priceCents": 500,
+      "icedPriceCents": 600,
+      "taxBasisPoints": 825,
+      "groupIds": [
+        "coffee-flavors",
+        "milk",
+        "temperature",
+        "extras"
+      ],
+      "productNote": ""
+    },
+    {
+      "id": "default1",
+      "name": "Latte",
+      "station": "Coffee Station",
+      "temp": "hotcold",
+      "active": true,
+      "seasonal": false,
+      "priceCents": 700,
+      "icedPriceCents": null,
+      "taxBasisPoints": 825,
+      "groupIds": [
+        "coffee-flavors",
+        "milk",
+        "temperature",
+        "extras"
+      ],
+      "productNote": ""
+    },
+    {
+      "id": "default2",
+      "name": "Mocha",
+      "station": "Coffee Station",
+      "temp": "hotcold",
+      "active": true,
+      "seasonal": false,
+      "priceCents": 800,
+      "icedPriceCents": null,
+      "taxBasisPoints": 825,
+      "groupIds": [
+        "coffee-flavors",
+        "milk",
+        "temperature",
+        "extras"
+      ],
+      "productNote": ""
+    },
+    {
+      "id": "default3",
+      "name": "White Mocha",
+      "station": "Coffee Station",
+      "temp": "hotcold",
+      "active": true,
+      "seasonal": false,
+      "priceCents": 800,
+      "icedPriceCents": null,
+      "taxBasisPoints": 825,
+      "groupIds": [
+        "coffee-flavors",
+        "milk",
+        "temperature",
+        "extras"
+      ],
+      "productNote": ""
+    },
+    {
+      "id": "default4",
+      "name": "Chai Tea Latte",
+      "station": "Coffee Station",
+      "temp": "hotcold",
+      "active": true,
+      "seasonal": false,
+      "priceCents": 700,
+      "icedPriceCents": null,
+      "taxBasisPoints": 825,
+      "groupIds": [
+        "coffee-flavors",
+        "milk",
+        "temperature",
+        "extras"
+      ],
+      "productNote": ""
+    },
+    {
+      "id": "default6",
+      "name": "Affogato",
+      "station": "Coffee Station",
+      "temp": "none",
+      "active": true,
+      "seasonal": false,
+      "priceCents": 550,
+      "icedPriceCents": null,
+      "taxBasisPoints": 825,
+      "groupIds": [
+        "coffee-flavors",
+        "milk",
+        "temperature",
+        "extras"
+      ],
+      "productNote": ""
+    },
+    {
+      "id": "default7",
+      "name": "Orange Aerocano",
+      "station": "Coffee Station",
+      "temp": "cold",
+      "active": true,
+      "seasonal": false,
+      "priceCents": 550,
+      "icedPriceCents": null,
+      "taxBasisPoints": 825,
+      "groupIds": [
+        "coffee-flavors",
+        "milk",
+        "temperature",
+        "extras"
+      ],
+      "productNote": ""
+    },
+    {
+      "id": "default10",
+      "name": "Iced Matcha Latte",
+      "station": "Cooler Station",
+      "temp": "cold",
+      "active": true,
+      "seasonal": false,
+      "priceCents": 700,
+      "icedPriceCents": null,
+      "taxBasisPoints": 825,
+      "groupIds": [
+        "matcha-flavors",
+        "milk",
+        "temperature",
+        "extras"
+      ],
+      "productNote": ""
+    },
+    {
+      "id": "default11",
+      "name": "Matchanstain",
+      "station": "Cooler Station",
+      "temp": "cold",
+      "active": true,
+      "seasonal": true,
+      "priceCents": 800,
+      "icedPriceCents": null,
+      "taxBasisPoints": 825,
+      "groupIds": [
+        "matcha-flavors",
+        "milk",
+        "temperature",
+        "extras"
+      ],
+      "productNote": ""
+    },
+    {
+      "id": "default12",
+      "name": "Watermelonade",
+      "station": "Cooler Station",
+      "temp": "cold",
+      "active": true,
+      "seasonal": false,
+      "priceCents": 800,
+      "icedPriceCents": null,
+      "taxBasisPoints": 825,
+      "groupIds": [
+        "extras"
+      ],
+      "productNote": ""
+    },
+    {
+      "id": "default13",
+      "name": "Dirty Cow",
+      "station": "Cooler Station",
+      "temp": "cold",
+      "active": true,
+      "seasonal": false,
+      "priceCents": 800,
+      "icedPriceCents": null,
+      "taxBasisPoints": 825,
+      "groupIds": [
+        "extras"
+      ],
+      "productNote": ""
+    },
+    {
+      "id": "default14",
+      "name": "Mango Traffic Jam",
+      "station": "Cooler Station",
+      "temp": "cold",
+      "active": true,
+      "seasonal": false,
+      "priceCents": 800,
+      "icedPriceCents": null,
+      "taxBasisPoints": 825,
+      "groupIds": [
+        "extras"
+      ],
+      "productNote": ""
+    },
+    {
+      "id": "default15",
+      "name": "Waffle",
+      "station": "Waffle Station",
+      "temp": "none",
+      "active": true,
+      "seasonal": false,
+      "priceCents": 800,
+      "icedPriceCents": null,
+      "taxBasisPoints": 825,
+      "groupIds": [
+        "waffle-toppings"
+      ],
+      "productNote": ""
+    }
+  ],
+  "modifierGroups": [
+    {
+      "id": "coffee-flavors",
+      "name": "Coffee flavors",
+      "multi": true,
+      "min": 0,
+      "max": 0,
+      "included": 0,
+      "active": true,
+      "options": [
+        {
+          "id": "coffee-flavors-0",
+          "name": "Pistachio",
+          "priceCents": 100,
+          "taxable": true,
+          "active": true
+        },
+        {
+          "id": "coffee-flavors-1",
+          "name": "Coconut",
+          "priceCents": 100,
+          "taxable": true,
+          "active": true
+        },
+        {
+          "id": "coffee-flavors-2",
+          "name": "Caramel",
+          "priceCents": 100,
+          "taxable": true,
+          "active": true
+        },
+        {
+          "id": "coffee-flavors-3",
+          "name": "Pumpkin Spice",
+          "priceCents": 100,
+          "taxable": true,
+          "active": true
+        },
+        {
+          "id": "coffee-flavors-4",
+          "name": "Vanilla",
+          "priceCents": 100,
+          "taxable": true,
+          "active": true
+        },
+        {
+          "id": "coffee-flavors-5",
+          "name": "Zero Sugar Vanilla",
+          "priceCents": 100,
+          "taxable": true,
+          "active": true
+        }
+      ]
+    },
+    {
+      "id": "matcha-flavors",
+      "name": "Matcha flavors",
+      "multi": true,
+      "min": 0,
+      "max": 0,
+      "included": 0,
+      "active": true,
+      "options": [
+        {
+          "id": "matcha-flavors-0",
+          "name": "Strawberry",
+          "priceCents": 100,
+          "taxable": true,
+          "active": true
+        },
+        {
+          "id": "matcha-flavors-1",
+          "name": "Mango",
+          "priceCents": 100,
+          "taxable": true,
+          "active": true
+        },
+        {
+          "id": "matcha-flavors-2",
+          "name": "Coconut",
+          "priceCents": 100,
+          "taxable": true,
+          "active": true
+        }
+      ]
+    },
+    {
+      "id": "waffle-toppings",
+      "name": "Waffle toppings",
+      "multi": true,
+      "min": 0,
+      "max": 0,
+      "included": 1,
+      "active": true,
+      "options": [
+        {
+          "id": "waffle-toppings-0",
+          "name": "Banana",
+          "priceCents": 100,
+          "taxable": true,
+          "active": true
+        },
+        {
+          "id": "waffle-toppings-1",
+          "name": "Nutella",
+          "priceCents": 100,
+          "taxable": true,
+          "active": true
+        },
+        {
+          "id": "waffle-toppings-2",
+          "name": "Lechera",
+          "priceCents": 100,
+          "taxable": true,
+          "active": true
+        },
+        {
+          "id": "waffle-toppings-3",
+          "name": "Peanut Butter",
+          "priceCents": 100,
+          "taxable": true,
+          "active": true
+        },
+        {
+          "id": "waffle-toppings-4",
+          "name": "Chocolate",
+          "priceCents": 100,
+          "taxable": true,
+          "active": true
+        },
+        {
+          "id": "waffle-toppings-5",
+          "name": "Maple Syrup",
+          "priceCents": 100,
+          "taxable": true,
+          "active": true
+        },
+        {
+          "id": "waffle-toppings-6",
+          "name": "Honey",
+          "priceCents": 100,
+          "taxable": true,
+          "active": true
+        }
+      ]
+    },
+    {
+      "id": "milk",
+      "name": "Milk",
+      "multi": false,
+      "min": 0,
+      "max": 1,
+      "included": 0,
+      "active": true,
+      "options": [
+        {
+          "id": "milk-0",
+          "name": "Regular",
+          "priceCents": 0,
+          "taxable": true,
+          "active": true
+        },
+        {
+          "id": "milk-1",
+          "name": "Oat Milk",
+          "priceCents": 0,
+          "taxable": true,
+          "active": true
+        }
+      ]
+    },
+    {
+      "id": "temperature",
+      "name": "Temperature",
+      "multi": false,
+      "min": 0,
+      "max": 1,
+      "included": 0,
+      "active": true,
+      "options": [
+        {
+          "id": "temperature-0",
+          "name": "Hot",
+          "priceCents": 0,
+          "taxable": true,
+          "active": true
+        },
+        {
+          "id": "temperature-1",
+          "name": "Iced",
+          "priceCents": 0,
+          "taxable": true,
+          "active": true
+        }
+      ]
+    },
+    {
+      "id": "extras",
+      "name": "Extras",
+      "multi": true,
+      "min": 0,
+      "max": 0,
+      "included": 0,
+      "active": true,
+      "options": [
+        {
+          "id": "extras-0",
+          "name": "Extra shot",
+          "priceCents": 150,
+          "taxable": true,
+          "active": true
+        },
+        {
+          "id": "extras-1",
+          "name": "Decaf",
+          "priceCents": 0,
+          "taxable": true,
+          "active": true
+        },
+        {
+          "id": "extras-2",
+          "name": "No ice",
+          "priceCents": 0,
+          "taxable": true,
+          "active": true
+        },
+        {
+          "id": "extras-3",
+          "name": "Light ice",
+          "priceCents": 0,
+          "taxable": true,
+          "active": true
+        },
+        {
+          "id": "extras-4",
+          "name": "No foam",
+          "priceCents": 0,
+          "taxable": true,
+          "active": true
+        },
+        {
+          "id": "extras-5",
+          "name": "Extra foam",
+          "priceCents": 0,
+          "taxable": true,
+          "active": true
+        }
+      ]
+    }
+  ],
+  "pendingProducts": [
+    {
+      "id": "default5",
+      "name": "Hot Chocolate",
+      "station": "Coffee Station",
+      "temp": "hot",
+      "active": true,
+      "seasonal": false,
+      "priceCents": null,
+      "icedPriceCents": null,
+      "taxBasisPoints": 825,
+      "groupIds": [
+        "coffee-flavors",
+        "milk",
+        "temperature",
+        "extras"
+      ],
+      "productNote": "",
+      "reason": "Administrator must provide the missing base price before importing this product"
+    },
+    {
+      "id": "default8",
+      "name": "Iced Pumpkin Spice Latte",
+      "station": "Coffee Station",
+      "temp": "cold",
+      "active": true,
+      "seasonal": true,
+      "priceCents": null,
+      "icedPriceCents": null,
+      "taxBasisPoints": 825,
+      "groupIds": [
+        "coffee-flavors",
+        "milk",
+        "temperature",
+        "extras"
+      ],
+      "productNote": "",
+      "reason": "Administrator must provide the missing base price before importing this product"
+    },
+    {
+      "id": "default9",
+      "name": "Iced Caramel Green Apple Latte",
+      "station": "Coffee Station",
+      "temp": "cold",
+      "active": true,
+      "seasonal": true,
+      "priceCents": null,
+      "icedPriceCents": null,
+      "taxBasisPoints": 825,
+      "groupIds": [
+        "coffee-flavors",
+        "milk",
+        "temperature",
+        "extras"
+      ],
+      "productNote": "",
+      "reason": "Administrator must provide the missing base price before importing this product"
+    }
+  ]
+}
