@@ -1,6 +1,7 @@
+import {cashRecordingEnabled,recordInternalCash,cashReceipt,cashHistory,cashSummary} from './internal-cash.mjs';
 import {assignPager,deliverOrder,kitchenOrders,orderHistory} from './fulfillment-d1.mjs';
 // Integrated test API. Remote mode requires explicit, isolated configuration; production is unsupported.
-// No Square client or payment execution is available. Deployment still requires authorization.
+// Square and real payments remain disabled. Internal test cash requires a separate explicit gate.
 import {login,authorize,logout,createStaff,revokeStaff} from './auth.mjs';
 import {applyCatalog} from './catalog-admin.mjs';
 import {privateRequestAllowed,sourceKey,rateAllowed,readJson,tokenEqual} from './security.mjs';
@@ -41,6 +42,18 @@ export async function sandboxApi(request,env){
   const admin=employee.permissions.includes('administrator'),cashier=admin||employee.permissions.includes('cashier');
   if(['/api/stations','/api/catalog/apply','/api/employees','/api/employees/revoke','/api/attempts/uncertain'].includes(url.pathname)&&!admin)return deny(403,'administrator_required');
   if(['/api/catalog','/api/orders','/api/orders/list','/api/orders/pager','/api/orders/delivered','/api/attempts'].includes(url.pathname)&&!cashier)return deny(403,'cashier_required');
+  if(url.pathname.startsWith('/api/cash')){
+   if(!cashier)return deny(403,'cashier_required');
+   if(url.pathname==='/api/cash/config'&&request.method==='GET')return reply(200,{enabled:cashRecordingEnabled(env),environment:'test',sentToSquare:false});
+   if(!cashRecordingEnabled(env))return reply(404,{error:'cash_recording_disabled'});
+   try{
+    if(url.pathname==='/api/cash'&&request.method==='POST'){if(Object.keys(body).some(k=>!['orderId','receivedCents'].includes(k)))return reply(400,{error:'unexpected_cash_field'});return reply(200,{receipt:await recordInternalCash(env.DB,{orderId:body.orderId,receivedCents:body.receivedCents,employeeId:employee.id})})}
+    if(url.pathname==='/api/cash'&&request.method==='GET')return reply(200,{receipt:await cashReceipt(env.DB,url.searchParams.get('orderId'))});
+    if(url.pathname==='/api/cash/history'&&request.method==='GET')return reply(200,await cashHistory(env.DB,{before:Number(url.searchParams.get('before')||Number.MAX_SAFE_INTEGER),limit:Number(url.searchParams.get('limit')||20),date:url.searchParams.get('date')}));
+    if(url.pathname==='/api/cash/summary'&&request.method==='GET'){if(!admin)return deny(403,'administrator_required');return reply(200,await cashSummary(env.DB,url.searchParams.get('date')))}
+   }catch(e){return reply(e.status||503,{error:e.code||'cash_recording_not_confirmed'})}
+   return reply(404,{error:'not_found'});
+  }
   if(url.pathname==='/api/session'&&request.method==='GET')return reply(200,{id:employee.id,permissions:employee.permissions});
   if(url.pathname==='/api/employees'&&request.method==='GET'){let staff=await env.DB.prepare('SELECT id,username,enabled FROM employees ORDER BY username').all();return reply(200,{employees:staff.results})}
   if(url.pathname==='/api/employees'&&request.method==='POST'){try{let created=await createStaff(env.DB,{id:crypto.randomUUID().replaceAll('-',''),username:body.username,password:body.password,role:body.role,actorId:employee.id});return reply(201,created)}catch{return reply(400,{error:'invalid_employee'})}}
