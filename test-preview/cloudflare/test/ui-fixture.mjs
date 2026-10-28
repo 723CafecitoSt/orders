@@ -1,3 +1,5 @@
+import {loadCatalog} from '../src/catalog-d1.mjs';
+import {priceOrder} from '../src/pricing.mjs';
 // Local disposable fixture, never import into a deployable Worker.
 import {createStaff} from '../src/auth.mjs';
 export async function uiFixture(db){
@@ -10,3 +12,5 @@ export async function uiFixture(db){
  for(let [prod,station] of [['default1','beverages'],['default15','food']])await db.prepare('INSERT OR IGNORE INTO product_stations(product_id,station,updated_by,updated_at) VALUES(?,?,?,?)').bind(prod,station,id,Date.now()).run();
  return {username,password:'test-password-123',products:['default1','default15']};
 }
+
+export async function bulkKitchenFixture(db){const employee=await db.prepare("SELECT id FROM employees WHERE username='local_fixture'").first();if(!employee)throw Error('Initialize fixture first');let catalog=await loadCatalog(db),snapshot=priceOrder({items:[{productId:'default1',quantity:1,temperature:'Iced',modifierIds:['milk-0','temperature-1']}]},catalog),prefix='bulk_'+crypto.randomUUID().replaceAll('-',''),ids=Array.from({length:505},(_,i)=>prefix+'_'+i);await db.prepare('INSERT INTO orders(id,employee_id,snapshot_json,subtotal_cents,tax_cents,total_cents,created_at,request_fingerprint) SELECT value,?,?,?,?,?,?,NULL FROM json_each(?)').bind(employee.id,JSON.stringify(snapshot),snapshot.subtotalCents,snapshot.taxCents,snapshot.totalCents,Date.now(),JSON.stringify(ids)).run();return {count:ids.length};}

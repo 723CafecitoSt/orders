@@ -1,6 +1,6 @@
-// Deliberately non-operational security gate: no payments, login or data access.
-// Do not remove this gate or deploy until authentication, CORS and CSRF are reviewed.
+// Only the explicitly configured test deployment can reach data routes. No Square client is imported.
+import {sandboxApi} from './sandbox-api.mjs';
 export default {async fetch(request,env){
- if(env.APP_MODE!=='simulation')return new Response('Disabled',{status:503,headers:{'cache-control':'no-store'}});
- return Response.json({status:'not_ready',message:'Sandbox backend is under development. No payments or customer data are accepted.'},{status:503,headers:{'cache-control':'no-store','x-content-type-options':'nosniff'}});
+ if(env.APP_MODE!=='private_test'||env.TEST_ENABLED!=='true'||env.PAYMENTS_ENABLED!=='false')return Response.json({status:'disabled'},{status:503,headers:{'cache-control':'no-store','x-content-type-options':'nosniff'}});
+ return sandboxApi(request,env);
 }};

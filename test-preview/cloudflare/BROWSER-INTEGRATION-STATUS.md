@@ -1,17 +1,20 @@
-# Browser integration status
+# Interfaz integrada: qué se probó y qué no
 
-## Browser installation
-Attempted the installed Playwright CLI to install Chromium 151.0.7922.34. Downloads from cdn.playwright.dev yielded zero-byte or truncated archives, so installation failed. No Chromium, Chrome or Firefox binary was found under /usr or /opt, and the Playwright executable path did not exist. No browser UI or visual test was run. A supported local browser environment with network access to the Playwright browser binaries is required; do not declare the UI flow complete.
+La caja sigue siendo `test-preview/index.html`; no hay otra aplicación de caja. La pantalla integrada de cocina es `cloudflare/kitchen/live.html`. `test-backend-config.js` es configuración pública sin secretos, deshabilitada por defecto y restringida al origen de pruebas configurado. El frontend y el Worker normal permanecen cerrados/desconectados hasta autorización y configuración.
 
-## Local changes and tests
-The opt-in local POS adapter has a Restore pending order button. The saved draft includes the original order number, date, notes and items so it can be restored after a reload; this remains untested in a browser. The adapter adds Print Kitchen Ticket for the most recent connected order, 80 mm CSS, a localStorage log of print-dialog attempts and an explicit confirmation and REPRINT label on repeat. That log is device-local, not a shared or authenticated D1 print audit. A print-dialog attempt does not establish that paper was printed. No physical printer was tested.
+## Cambios actuales
 
-Migration 0007 introduces staff station access. Admins can access both; cashiers require explicit access entries. API routes check the station on reads and status changes. Provisioning UI and remote security review are not implemented. This local migration was applied only to fresh disposable Wrangler D1, never remotely.
+La caja conectada carga productos, modificadores, precios y tasas desde D1. Administrator publica cambios desde Menu Manager/Modifier Manager; se aplica control de versión y auditoría. Nuevo producto: 8.25% seleccionado; existentes: conservan sus tasas. Las tasas por venta están bloqueadas; el servidor rechaza un cambio no autorizado. Se mantienen las simulaciones y el historial offline separado; ninguna venta antigua se recalcula.
 
-A local fixture creates admin and unprivileged test staff, matching the actual POS product and modifier IDs for Latte, Waffle, Caramel, Nutella, milk and temperature. Wrangler HTTPS + D1 API test confirms Iced Latte + Caramel and Waffle + Nutella, first waffle topping included, total $17.32 at 8.25% for both, station routing and denied access for an employee without permission. Another API test confirms order persistence, separate sessions, Ready state, stale-update rejection and duplicate order rejection. The 19 Node tests pass. These are API and Node tests, NOT button or browser tests; local certificate checks were disabled only in test processes.
+Las sesiones viven en memoria y expiran a la hora. Recargar exige iniciar sesión otra vez y recupera el borrador/solicitud guardada sin cambiar su identificador. El servidor valida el contenido y devuelve la copia ya guardada en reintentos; no se marca una orden como pagada. Cocina utiliza los permisos de estación, número de orden del servidor, actualizaciones con versión y páginas estables.
 
-## Remaining blockers
-- Actual UI->D1->two kitchen browser test including the order number and visual ticket was not performed. Server-generated human order number and catalogue sync/authorized tax override are not implemented. Local UI and D1 require compatible catalog IDs and rates.
-- Restore after reload, print CSS/dialog, error cases and two independent phone/tablet sessions need real browser tests. Print log is local to one device and cannot prevent duplicate printing on two devices. No exactly-once printing guarantee.
-- Kitchen retains a 500-row limit; ordering newer items first is not pagination or archiving. Station permissions require secure admin provisioning and test coverage of allowed and denied status updates. Kitchen data separation, permissions, HTTPS sessions, rate limiting and audit require security review.
-- Worker deployment remains locked; no remote D1 migration, Square Sandbox transaction or real payment occurred. These changes are not for customer use.
+Impresión: vista de 80 mm mediante diálogo estándar, registros locales y confirmación explícita de REPRINT. No se probó impresora y no hay garantía de impresión exactamente una vez ni registro de impresiones entre dispositivos.
+
+## Pruebas
+
+- Pruebas Node: lógica de impuestos, catálogo, controles del Worker, permisos, CSRF, sesiones, revocación, auditoría, validación de origen, límites, recuperación/reintentos e historial. Se ejercitó la función real de Menu Manager en VM para comprobar el valor seleccionado y guardado de impuestos; VM no es un navegador.
+- Wrangler/workerd + D1 local: rutas reales de la caja/cocina y del Worker privado, dos sesiones independientes, datos Latte Iced + Caramel y Waffle + Nutella, importes, cambios autorizados 725/0 y nuevo producto 825, denegación de tasa arbitraria, reintentos simultáneos, estados, permisos, revocación, rate limit y paginación con más de 500 artículos.
+- Sintaxis de scripts/CSP, paquete estático y compilación local del Worker. El proceso de build no despliega nada.
+- No hubo prueba visual, de botones reales, de Samsung ni de un segundo dispositivo físico. La instalación previa de Chromium falló con archivos descargados vacíos/truncados. Las pruebas HTTPS usan certificado local y verificación de certificado desactivada solamente en los procesos de prueba.
+
+Antes de declarar el despliegue seguro hay que verificar la identidad de D1, configurar orígenes/secretos y revisar el esquema real, luego autorizar la infraestructura de prueba y ejecutar las pruebas manuales. Ver REMOTE-TEST-READINESS.md y PREDEPLOY-SECURITY-REVIEW.md.

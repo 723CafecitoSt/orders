@@ -1,4 +1,5 @@
-import {uiFixture} from './ui-fixture.mjs';
+import privateWorker from '../src/worker.mjs';
+import {uiFixture,bulkKitchenFixture} from './ui-fixture.mjs';
 import {sandboxApi} from '../src/sandbox-api.mjs';
 // Local integration harness only. No payment calls or secrets.
 import {localApi} from '../src/local-api.mjs';
@@ -6,7 +7,7 @@ import {createStaff,login,authorize,logout} from '../src/auth.mjs';
 import {createOrder,getOrder} from '../src/orders-d1.mjs';
 import {reserveAttempt,recordUncertain} from '../src/attempts.mjs';
 function check(v,msg){if(!v)throw Error(msg)}
-export default {async fetch(req,env){if(env.APP_MODE!=='local_test')return new Response('disabled',{status:503});if(new URL(req.url).pathname==='/ui-fixture')return Response.json(await uiFixture(env.DB));if(new URL(req.url).pathname.startsWith('/api/'))return sandboxApi(req,{...env,TEST_ORIGIN:'https://test.localhost'});if(new URL(req.url).pathname!=='/')return localApi(req,env);try{
+export default {async fetch(req,env){if(env.APP_MODE!=='local_test'||new URL(req.url).hostname!=='127.0.0.1')return new Response('disabled',{status:503});if(new URL(req.url).pathname.startsWith('/private-api/')){let u=new URL(req.url);u.pathname=u.pathname.replace('/private-api','');return privateWorker.fetch(new Request(u,req),{...env,APP_MODE:'private_test',TEST_ENABLED:'true',PAYMENTS_ENABLED:'false',TEST_DATABASE_ID:'local-security-suite',TEST_FRONTEND_ORIGIN:'https://test.localhost',TEST_API_ORIGIN:u.origin,RATE_LIMIT_SECRET:'LOCAL_SECURITY_SUITE_NOT_A_SECRET_12345'});}if(new URL(req.url).pathname==='/bulk-fixture')return Response.json(await bulkKitchenFixture(env.DB));if(new URL(req.url).pathname==='/ui-fixture')return Response.json(await uiFixture(env.DB));if(new URL(req.url).pathname.startsWith('/api/'))return sandboxApi(req,{...env,TEST_ORIGIN:'https://test.localhost'});if(new URL(req.url).pathname!=='/')return localApi(req,env);try{
  let db=env.DB,id='local_'+crypto.randomUUID().replaceAll('-',''),orderId='order_'+id,emp='staff_'+id,product='product_'+id;
  await createStaff(db,{id:emp,username:id,password:'test-password-123',role:'cashier'});let bad=await login(db,id,'incorrect');check(bad===null,'bad password');let l=await login(db,id,'test-password-123');check(l?.session,'login');check((await authorize(db,l.session,l.csrf,'cashier'))?.id===emp,'cashier');check(await authorize(db,l.session,l.csrf,'admin')===null,'permissions');check(await authorize(db,l.session,'0'.repeat(64))===null,'csrf');
  await db.prepare('INSERT INTO products (id,name,base_cents,iced_cents,tax_bps,active) VALUES (?,?,?,?,?,1)').bind(product,'Test Latte',700,700,825).run();
