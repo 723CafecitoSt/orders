@@ -2,11 +2,11 @@
 const encoder=new TextEncoder(),hex=bytes=>Array.from(new Uint8Array(bytes),x=>x.toString(16).padStart(2,'0')).join('');
 const usernameOK=u=>typeof u==='string'&&/^[A-Za-z0-9_-]{3,40}$/.test(u),ITERATIONS=600000;
 const digest=async s=>hex(await crypto.subtle.digest('SHA-256',encoder.encode(s)));
-async function passwordHash(password,salt){const key=await crypto.subtle.importKey('raw',encoder.encode(password),'PBKDF2',false,['deriveBits']);return hex(await crypto.subtle.deriveBits({name:'PBKDF2',hash:'SHA-256',salt:encoder.encode(salt),iterations:ITERATIONS},key,256))}
+async function passwordHash(password,salt){try{const key=await crypto.subtle.importKey('raw',encoder.encode(password),'PBKDF2',false,['deriveBits']);return hex(await crypto.subtle.deriveBits({name:'PBKDF2',hash:'SHA-256',salt:encoder.encode(salt),iterations:ITERATIONS},key,256))}catch{throw Object.assign(new Error('Password derivation unavailable'),{code:'password_hash_unavailable'})}}
 function equal(a,b){if(typeof a!=='string'||typeof b!=='string'||a.length!==b.length)return false;let x=0;for(let i=0;i<a.length;i++)x|=a.charCodeAt(i)^b.charCodeAt(i);return x===0}
 export async function createStaff(db,{id,username,password,role='cashier',actorId=null,bootstrap=false}){
  const permissions=role==='kitchen'?['beverages','food']:[role==='admin'?'administrator':role],permission=permissions[0];
- if(!/^[A-Za-z0-9_-]{8,64}$/.test(id)||!usernameOK(username)||typeof password!=='string'||password.length<14||password.length>200||!permissions.every(p=>['administrator','cashier','beverages','food'].includes(p))||(bootstrap&&permission!=='administrator'))throw Error('Invalid staff');
+ if(!/^[A-Za-z0-9_-]{8,64}$/.test(id)||!usernameOK(username)||typeof password!=='string'||password.length<14||password.length>200||!permissions.every(p=>['administrator','cashier','beverages','food'].includes(p))||(bootstrap&&permission!=='administrator'))throw Object.assign(new Error('Invalid staff'),{code:'invalid_staff'});
  let salt=hex(crypto.getRandomValues(new Uint8Array(16))),hash=await passwordHash(password,salt),now=Date.now(),statements=[];
  if(bootstrap)statements.push(db.prepare('INSERT INTO bootstrap_once(singleton,created_at) VALUES(1,?)').bind(now));
  statements.push(db.prepare('INSERT INTO employees(id,username,password_hash,salt,enabled,role) VALUES(?,?,?,?,1,?)').bind(id,username,hash,salt,permission==='administrator'?'admin':'cashier'));

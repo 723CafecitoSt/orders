@@ -28,7 +28,7 @@ export async function sandboxApi(request,env){
   if(url.pathname==='/api/bootstrap'&&request.method==='POST'){
    if(!remote||!await rateAllowed(env.DB,'bootstrap:'+source,3)||!await tokenEqual(request.headers.get('x-bootstrap-token'),env.BOOTSTRAP_SECRET))return reply(403,{error:'forbidden'});
    let count=await env.DB.prepare('SELECT COUNT(*) n FROM employees').first();if(count.n!==0)return reply(409,{error:'already_initialized'});
-   try{await createStaff(env.DB,{id:crypto.randomUUID().replaceAll('-',''),username:body.username,password:body.password,role:'administrator',bootstrap:true});return reply(201,{ok:true})}catch{return reply(409,{error:'bootstrap_failed'})}
+   try{await createStaff(env.DB,{id:crypto.randomUUID().replaceAll('-',''),username:body.username,password:body.password,role:'administrator',bootstrap:true});return reply(201,{ok:true})}catch(e){if(e.code==='password_hash_unavailable')return reply(503,{error:'password_hash_unavailable'});if(e.code==='invalid_staff')return reply(400,{error:'invalid_staff'});return reply(409,{error:'bootstrap_storage_conflict'})}
   }
   if(url.pathname==='/api/login'&&request.method==='POST'){
    if(!await rateAllowed(env.DB,'login:'+source,remote?5:12))return reply(429,{error:'rate_limited'});
