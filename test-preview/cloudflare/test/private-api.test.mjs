@@ -12,6 +12,6 @@ test('private API protects bootstrap, permissions, CORS/CSRF, employee revocatio
 test('bootstrap distinguishes invalid input and unavailable cryptography without leaking secrets or writing partial staff',async()=>{
  let {raw,env,call}=setup();
  let invalid=await call('/api/bootstrap','POST',{username:'bad email@example.test',password:'test-password-123'},null,{'x-bootstrap-token':env.BOOTSTRAP_SECRET});assert.equal(invalid.status,400);assert.equal(invalid.body.error,'invalid_staff');
- const original=crypto.subtle.deriveBits;crypto.subtle.deriveBits=async()=>{throw new DOMException('Simulated production PBKDF2 iteration ceiling; PRIVATE SENTINEL','NotSupportedError')};
+ const original=crypto.subtle.deriveBits;crypto.subtle.deriveBits=async()=>{throw new Error('Simulated unexpected cryptographic failure; PRIVATE SENTINEL')};
  try{let result=await call('/api/bootstrap','POST',{username:'admin',password:'test-password-123'},null,{'x-bootstrap-token':env.BOOTSTRAP_SECRET});assert.equal(result.status,503);assert.deepEqual(result.body,{error:'password_hash_unavailable'});assert.equal(raw.prepare('SELECT COUNT(*) n FROM employees').get().n,0);assert.equal(raw.prepare('SELECT COUNT(*) n FROM bootstrap_once').get().n,0)}finally{crypto.subtle.deriveBits=original;raw.close()}
 });
