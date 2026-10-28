@@ -1,19 +1,31 @@
 {
- "$schema":"node_modules/wrangler/config-schema.json",
- "name":"723-orders-private-test",
- "main":"src/worker.mjs",
- "compatibility_date":"2026-10-01",
- "workers_dev":false,
- "preview_urls":false,
- "limits":{"cpu_ms":1000},
- "observability":{"enabled":false},
- "d1_databases":[{"binding":"DB","database_name":"723-orders-private-test","database_id":"00000000-0000-4000-8000-000000000000","migrations_dir":"migrations"}],
- "vars":{
-  "APP_MODE":"private_test",
-  "TEST_ENABLED":"false",
-  "PAYMENTS_ENABLED":"false",
-  "TEST_DATABASE_ID":"REPLACE_WITH_TEST_D1_ID",
-  "TEST_FRONTEND_ORIGIN":"https://orders-test.723cafecitost.com",
-  "TEST_API_ORIGIN":"https://orders-api-test.723cafecitost.com"
- }
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "723-order-sandbox-api",
+  "main": "src/worker.mjs",
+  "compatibility_date": "2026-10-01",
+  "workers_dev": false,
+  "preview_urls": false,
+  "limits": {
+    "cpu_ms": 1000
+  },
+  "observability": {
+    "enabled": false
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "723-order-sandbox",
+      "database_id": "08db81df-4a48-4c2a-a659-e56ab54abbf3",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "vars": {
+    "APP_MODE": "private_test",
+    "TEST_ENABLED": "false",
+    "PAYMENTS_ENABLED": "false",
+    "TEST_DATABASE_ID": "08db81df-4a48-4c2a-a659-e56ab54abbf3",
+    "TEST_FRONTEND_ORIGIN": "https://orders-test.723cafecitost.com",
+    "TEST_API_ORIGIN": "https://orders-api-test.723cafecitost.com"
+  },
+  "account_id": "3fc8e778c640e6dd589c674875a72a6f"
 }
