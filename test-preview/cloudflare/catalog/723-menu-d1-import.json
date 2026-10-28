@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "source": "Existing test-preview/index.html catalog; no newly invented base prices",
+  "source": "Existing test menu with user-confirmed corrections: Chocolate Mexicano $7 Hot/Iced, Green Apple Caramel $8; standalone Pumpkin removed; Pumpkin Spice flavor retained.",
   "menu": [
     {
       "id": "default0",
@@ -93,6 +93,24 @@
       "productNote": ""
     },
     {
+      "id": "default5",
+      "name": "Chocolate Mexicano",
+      "station": "Coffee Station",
+      "temp": "hotcold",
+      "active": true,
+      "seasonal": false,
+      "priceCents": 700,
+      "icedPriceCents": null,
+      "taxBasisPoints": 825,
+      "groupIds": [
+        "coffee-flavors",
+        "milk",
+        "temperature",
+        "extras"
+      ],
+      "productNote": ""
+    },
+    {
       "id": "default6",
       "name": "Affogato",
       "station": "Coffee Station",
@@ -118,6 +136,24 @@
       "active": true,
       "seasonal": false,
       "priceCents": 550,
+      "icedPriceCents": null,
+      "taxBasisPoints": 825,
+      "groupIds": [
+        "coffee-flavors",
+        "milk",
+        "temperature",
+        "extras"
+      ],
+      "productNote": ""
+    },
+    {
+      "id": "default9",
+      "name": "Iced Caramel Green Apple Latte",
+      "station": "Coffee Station",
+      "temp": "cold",
+      "active": true,
+      "seasonal": true,
+      "priceCents": 800,
       "icedPriceCents": null,
       "taxBasisPoints": 825,
       "groupIds": [
@@ -475,63 +511,12 @@
       ]
     }
   ],
-  "pendingProducts": [
-    {
-      "id": "default5",
-      "name": "Hot Chocolate",
-      "station": "Coffee Station",
-      "temp": "hot",
-      "active": true,
-      "seasonal": false,
-      "priceCents": null,
-      "icedPriceCents": null,
-      "taxBasisPoints": 825,
-      "groupIds": [
-        "coffee-flavors",
-        "milk",
-        "temperature",
-        "extras"
-      ],
-      "productNote": "",
-      "reason": "Administrator must provide the missing base price before importing this product"
-    },
+  "pendingProducts": [],
+  "excludedProducts": [
     {
       "id": "default8",
       "name": "Iced Pumpkin Spice Latte",
-      "station": "Coffee Station",
-      "temp": "cold",
-      "active": true,
-      "seasonal": true,
-      "priceCents": null,
-      "icedPriceCents": null,
-      "taxBasisPoints": 825,
-      "groupIds": [
-        "coffee-flavors",
-        "milk",
-        "temperature",
-        "extras"
-      ],
-      "productNote": "",
-      "reason": "Administrator must provide the missing base price before importing this product"
-    },
-    {
-      "id": "default9",
-      "name": "Iced Caramel Green Apple Latte",
-      "station": "Coffee Station",
-      "temp": "cold",
-      "active": true,
-      "seasonal": true,
-      "priceCents": null,
-      "icedPriceCents": null,
-      "taxBasisPoints": 825,
-      "groupIds": [
-        "coffee-flavors",
-        "milk",
-        "temperature",
-        "extras"
-      ],
-      "productNote": "",
-      "reason": "Administrator must provide the missing base price before importing this product"
+      "reason": "Removed at administrator request; Pumpkin Spice remains an individual $1 flavor for Latte."
     }
   ]
 }
