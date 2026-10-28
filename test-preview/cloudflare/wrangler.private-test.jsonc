@@ -24,8 +24,8 @@
     "TEST_ENABLED": "false",
     "PAYMENTS_ENABLED": "false",
     "TEST_DATABASE_ID": "08db81df-4a48-4c2a-a659-e56ab54abbf3",
-    "TEST_FRONTEND_ORIGIN": "https://orders-test.723cafecitost.com",
-    "TEST_API_ORIGIN": "https://orders-api-test.723cafecitost.com"
+    "TEST_FRONTEND_ORIGIN": "https://723-order-station-test.pages.dev",
+    "TEST_API_ORIGIN": "https://723-order-sandbox-api.jc-since1987.workers.dev"
   },
   "account_id": "3fc8e778c640e6dd589c674875a72a6f"
 }
