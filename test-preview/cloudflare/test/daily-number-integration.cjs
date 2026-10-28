@@ -1,0 +1,2 @@
+const assert=require('node:assert/strict');
+(async()=>{let r=await fetch((process.env.TEST_API_BASE||'https://127.0.0.1:8797')+'/daily-number-fixture'),data=await r.json();assert.equal(r.status,200,JSON.stringify(data));assert.equal(data.ok,true);assert.equal(data.checks.length,4);console.log('PASS: Wrangler HTTPS + actual local D1: Juarez midnight daily reset, concurrent unique numbers, cross-midnight replay, immutable amounts.')})().catch(e=>{console.error(e);process.exitCode=1});
