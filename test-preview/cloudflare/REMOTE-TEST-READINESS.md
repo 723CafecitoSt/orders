@@ -20,9 +20,11 @@ Este documento sustituye las listas antiguas de bloqueos. El código integrado p
 2. Sustituir el nombre y UUID ficticios de la configuración y el marcador TEST_DATABASE_ID por la identidad verificada; mantener TEST_ENABLED=false. Ejecutar `node scripts/check-private-config.mjs --configured`.
 3. Confirmar dos orígenes HTTPS de pruebas. Los dominios orders-test.723cafecitost.com y orders-api-test.723cafecitost.com son **propuestas**, no recursos existentes verificados. La fuente y publicación de GitHub Pages de producción no deben cambiarse. Para Pages con otro origen hace falta un host de publicación separado (por ejemplo, un repositorio que reciba solamente los archivos estáticos compilados y un subdominio de prueba). Crear ese recurso/DNS requiere autorización; no se ha hecho.
 4. Configurar personalmente los secretos RATE_LIMIT_SECRET (aleatorio, 32+ caracteres) y BOOTSTRAP_SECRET (aleatorio, 48+ caracteres) en Cloudflare, nunca en GitHub, configuración pública ni chat. No hace falta ningún secreto de Square. BOOTSTRAP_SECRET solo sirve para crear el primer administrador una vez; después se elimina. Los secretos no están configurados todavía.
-5. Revisar permisos, migraciones 0001–0010 y recuperación; obtener autorización específica para la D1 de prueba. Solo después aprobar despliegue inicialmente deshabilitado, ruta/TLS, inicialización de administrador y activación de pruebas. No activar Workers Paid ni contratar nada sin permiso.
+5. Revisar permisos, migraciones 0001–0011 y recuperación; obtener autorización específica para la D1 de prueba. Solo después aprobar despliegue inicialmente deshabilitado, ruta/TLS, inicialización de administrador y activación de pruebas. No activar Workers Paid ni contratar nada sin permiso.
 6. Completar la prueba manual con Samsung y un segundo dispositivo antes de considerar el flujo verificado en navegador. CSP, orígenes, almacenamiento, TLS público y reconexión no se han validado en un teléfono real.
 
 ## Verificación local
 
 Consultar PREDEPLOY-SECURITY-REVIEW.md para los resultados y las limitaciones. `npm test`, `npm run test:integration`, `npm run check:test-config` y `npm run build:test-frontend` son operaciones locales. El paquete Worker se comprobó con `wrangler deploy --dry-run`; no se publicó. El registro histórico de imposibilidad de instalar Chromium no se ha transformado en una afirmación de prueba visual.
+
+Actualización integrada de Order/Pager/Delivered: ver [PAGER-DELIVERY.md](PAGER-DELIVERY.md). La migración 0011 solo se ejecutó en D1 local.

@@ -1,3 +1,5 @@
+Ver también [PAGER-DELIVERY.md](PAGER-DELIVERY.md) para números de orden/pager, pantalla unificada y entrega final.
+
 ## Estado actualizado del entorno de pruebas
 
 Ver [REMOTE-TEST-READINESS.md](REMOTE-TEST-READINESS.md), [PREDEPLOY-SECURITY-REVIEW.md](PREDEPLOY-SECURITY-REVIEW.md) y [LOCAL-TEST-RESULTS.md](LOCAL-TEST-RESULTS.md). El Worker de prueba usa `wrangler.private-test.jsonc` y sigue deshabilitado. No ejecutar migraciones remotas ni desplegar sin autorización específica.

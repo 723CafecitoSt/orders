@@ -1,3 +1,4 @@
+import {assignPager,deliverOrder,kitchenOrders,orderHistory} from './fulfillment-d1.mjs';
 // Integrated test API. Remote mode requires explicit, isolated configuration; production is unsupported.
 // No Square client or payment execution is available. Deployment still requires authorization.
 import {login,authorize,logout,createStaff,revokeStaff} from './auth.mjs';
@@ -39,7 +40,7 @@ export async function sandboxApi(request,env){
   const deny=async(status,reason)=>{await audit(env.DB,employee.id,'access_denied',null,{path:url.pathname,reason});return reply(status,{error:reason})};
   const admin=employee.permissions.includes('administrator'),cashier=admin||employee.permissions.includes('cashier');
   if(['/api/stations','/api/catalog/apply','/api/employees','/api/employees/revoke','/api/attempts/uncertain'].includes(url.pathname)&&!admin)return deny(403,'administrator_required');
-  if(['/api/catalog','/api/orders','/api/attempts'].includes(url.pathname)&&!cashier)return deny(403,'cashier_required');
+  if(['/api/catalog','/api/orders','/api/orders/list','/api/orders/pager','/api/orders/delivered','/api/attempts'].includes(url.pathname)&&!cashier)return deny(403,'cashier_required');
   if(url.pathname==='/api/session'&&request.method==='GET')return reply(200,{id:employee.id,permissions:employee.permissions});
   if(url.pathname==='/api/employees'&&request.method==='GET'){let staff=await env.DB.prepare('SELECT id,username,enabled FROM employees ORDER BY username').all();return reply(200,{employees:staff.results})}
   if(url.pathname==='/api/employees'&&request.method==='POST'){try{let created=await createStaff(env.DB,{id:crypto.randomUUID().replaceAll('-',''),username:body.username,password:body.password,role:body.role,actorId:employee.id});return reply(201,created)}catch{return reply(400,{error:'invalid_employee'})}}
@@ -49,6 +50,17 @@ export async function sandboxApi(request,env){
   if(url.pathname==='/api/stations'&&request.method==='POST'){
    if(!idOK(body.productId)||!['beverages','food'].includes(body.station))return reply(400,{error:'invalid_station'});
    await env.DB.prepare('INSERT INTO product_stations(product_id,station,updated_by,updated_at) VALUES(?,?,?,?) ON CONFLICT(product_id) DO UPDATE SET station=excluded.station,updated_by=excluded.updated_by,updated_at=excluded.updated_at').bind(body.productId,body.station,employee.id,Date.now()).run();return reply(200,{ok:true});
+  }
+  if(['/api/orders/pager','/api/orders/delivered'].includes(url.pathname)&&request.method==='POST'){
+   if(!idOK(body.orderId)||!Number.isSafeInteger(body.version)||body.version<0||(url.pathname.endsWith('/pager')&&!Object.hasOwn(body,'pagerNumber')))return reply(400,{error:'invalid_order_update'});
+   try{return reply(200,await (url.pathname.endsWith('/pager')?assignPager(env.DB,{orderId:body.orderId,pagerNumber:body.pagerNumber,version:body.version,actorId:employee.id}):deliverOrder(env.DB,{orderId:body.orderId,version:body.version,actorId:employee.id})))}catch(e){return reply(e.status||400,{error:e.code||'invalid_order_update',...(e.code==='pager_in_use'?{pagerNumber:e.pagerNumber,conflictingOrderNumber:e.conflictingOrderNumber}:{})})}
+  }
+  if(['/api/kitchen/orders','/api/orders/list'].includes(url.pathname)&&request.method==='GET'){
+   let before=url.searchParams.get('before'),count=url.searchParams.get('limit')||'20';if(!/^[1-9]\d?$/.test(count)||Number(count)>50||(before!==null&&(!/^[1-9]\d{0,15}$/.test(before)||!Number.isSafeInteger(Number(before)))))return reply(400,{error:'invalid_page'});
+   const page={before:before===null?Number.MAX_SAFE_INTEGER:Number(before),limit:Number(count)};
+   if(url.pathname==='/api/orders/list')return reply(200,await orderHistory(env.DB,page));
+   let station=url.searchParams.get('station')||'all';if(!['all','beverages','food'].includes(station))return reply(400,{error:'invalid_station'});let allowed=admin||cashier?['beverages','food']:employee.permissions.filter(p=>['beverages','food'].includes(p));if((station==='all'&&allowed.length!==2)||(station!=='all'&&!allowed.includes(station)))return deny(403,'station_forbidden');
+   return reply(200,await kitchenOrders(env.DB,{...page,station,allowedStations:allowed,includeDelivered:url.searchParams.get('includeDelivered')==='1'}));
   }
   if(url.pathname==='/api/kitchen'&&request.method==='GET'){
    let station=url.searchParams.get('station');if(!['beverages','food'].includes(station))return reply(400,{error:'invalid_station'});
@@ -64,7 +76,7 @@ export async function sandboxApi(request,env){
   }
   if(url.pathname==='/api/catalog'&&request.method==='GET')return reply(200,await loadCatalog(env.DB));
   if(url.pathname==='/api/orders'&&request.method==='POST'){
-   try{let result=await createOrder(env.DB,{id:body.id,employeeId:employee.id,request:body.request,expectedTotalCents:body.expectedTotalCents,now:Date.now()});return reply(201,result)}catch{return reply(409,{error:'invalid_or_conflicting_order'})}
+   try{let result=await createOrder(env.DB,{id:body.id,employeeId:employee.id,request:body.request,expectedTotalCents:body.expectedTotalCents,now:Date.now()});return reply(201,result)}catch(e){return reply(409,{error:e.code||'invalid_or_conflicting_order',...(e.code==='pager_in_use'?{pagerNumber:e.pagerNumber,conflictingOrderNumber:e.conflictingOrderNumber}:{})})}
   }
   if(url.pathname==='/api/orders'&&request.method==='GET'){let id=url.searchParams.get('id');if(!idOK(id))return reply(400,{error:'invalid_id'});let order=await getOrder(env.DB,id);return order?reply(200,order):reply(404,{error:'not_found'})}
   if(url.pathname==='/api/attempts'&&request.method==='POST'){
